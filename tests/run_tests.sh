@@ -4,6 +4,7 @@
 set -u
 cd "$(dirname "$0")/.." || exit 2
 FX=tests/fixtures
+mkdir -p "$FX/bad/tmp" "$FX/good/tmp"   # git does not track empty directories
 chmod 644 "$FX/bad/etc/shadow";  chmod 666 "$FX/bad/etc/writable.conf"; chmod 755 "$FX/bad/tmp"
 chmod 640 "$FX/good/etc/shadow"; chmod 1777 "$FX/good/tmp"
 chmod 644 "$FX"/{bad,good}/etc/passwd
