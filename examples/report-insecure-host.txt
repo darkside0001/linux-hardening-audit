@@ -1,0 +1,53 @@
+linux-hardening-audit v1.0.0  host=bad-host  root=tests/fixtures/bad  2026-11-20T06:00:00Z
+
+== SSH ==
+[FAIL] Root login over SSH allowed (PermitRootLogin yes)
+       fix: Set 'PermitRootLogin no' in /etc/ssh/sshd_config and reload sshd.
+[FAIL] Password authentication enabled (PasswordAuthentication yes)
+       fix: Use SSH keys and set 'PasswordAuthentication no'. This removes the brute-force attack surface.
+[PASS] Empty passwords rejected (PermitEmptyPasswords no)
+[WARN] MaxAuthTries is higher than 4 (MaxAuthTries 10)
+       fix: Set 'MaxAuthTries 4' (or lower).
+[WARN] X11 forwarding enabled (X11Forwarding yes)
+       fix: Set 'X11Forwarding no' on servers.
+[WARN] LoginGraceTime is longer than 60s (LoginGraceTime 120)
+       fix: Set 'LoginGraceTime 60'.
+
+== Accounts ==
+[FAIL] Extra accounts with UID 0 (accounts: toor)
+       fix: Remove or re-number these accounts. Any UID 0 account is a full root account.
+[FAIL] Accounts with empty passwords (accounts: toor)
+       fix: Lock them with 'passwd -l <user>' or set a password.
+[WARN] Passwords never expire (PASS_MAX_DAYS 99999)
+       fix: Set PASS_MAX_DAYS 365 (or your policy) in /etc/login.defs.
+[WARN] Passwordless sudo rules found (NOPASSWD for: alice)
+       fix: Limit NOPASSWD to specific commands for service accounts only.
+
+== Filesystem ==
+[PASS] Permissions on /etc/passwd (mode 644, expected 644 or stricter)
+[FAIL] Permissions on /etc/shadow are too open (mode 644, expected 640 or stricter)
+       fix: chmod 640 /etc/shadow
+[PASS] Permissions on /etc/ssh/sshd_config (mode 644, expected 644 or stricter)
+[FAIL] World-writable files in /etc (/etc/writable.conf)
+       fix: chmod o-w on these files.
+[WARN] Sticky bit missing on /tmp (mode 755)
+       fix: chmod 1777 /tmp
+
+== Kernel ==
+[FAIL] ASLR fully enabled (kernel.randomize_va_space = 0, expected 2)
+       fix: Add 'kernel.randomize_va_space = 2' to /etc/sysctl.d/60-hardening.conf, then run 'sysctl --system'.
+[FAIL] TCP SYN cookies enabled (net.ipv4.tcp_syncookies = 0, expected 1)
+       fix: Add 'net.ipv4.tcp_syncookies = 1' to /etc/sysctl.d/60-hardening.conf, then run 'sysctl --system'.
+[FAIL] ICMP redirects ignored (net.ipv4.conf.all.accept_redirects = 1, expected 0)
+       fix: Add 'net.ipv4.conf.all.accept_redirects = 0' to /etc/sysctl.d/60-hardening.conf, then run 'sysctl --system'.
+[FAIL] ICMP redirects not sent (net.ipv4.conf.all.send_redirects = 1, expected 0)
+       fix: Add 'net.ipv4.conf.all.send_redirects = 0' to /etc/sysctl.d/60-hardening.conf, then run 'sysctl --system'.
+[FAIL] Source-routed packets rejected (net.ipv4.conf.all.accept_source_route = 1, expected 0)
+       fix: Add 'net.ipv4.conf.all.accept_source_route = 0' to /etc/sysctl.d/60-hardening.conf, then run 'sysctl --system'.
+[FAIL] Martian packets logged (net.ipv4.conf.all.log_martians = 0, expected 1)
+       fix: Add 'net.ipv4.conf.all.log_martians = 1' to /etc/sysctl.d/60-hardening.conf, then run 'sysctl --system'.
+
+== Services ==
+[SKIP] Running services (offline mode (--root), not checked)
+
+Summary: 3 pass, 6 warn, 12 fail, 1 skipped. Score: 28/100

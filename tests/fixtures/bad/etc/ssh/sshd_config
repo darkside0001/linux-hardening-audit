@@ -1,0 +1,5 @@
+# insecure test config
+PermitRootLogin yes
+PasswordAuthentication yes
+MaxAuthTries 10
+X11Forwarding yes

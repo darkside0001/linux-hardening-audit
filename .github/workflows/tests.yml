@@ -1,0 +1,15 @@
+name: tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: shellcheck audit.sh tests/run_tests.sh
+      - name: fixture tests
+        run: tests/run_tests.sh
+      - name: live run on the CI runner (report only)
+        run: sudo ./audit.sh --no-color || true
