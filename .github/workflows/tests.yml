@@ -8,8 +8,24 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: shellcheck
-        run: shellcheck audit.sh tests/run_tests.sh
+        run: shellcheck audit.sh harden.sh tests/run_tests.sh lab/*.sh
       - name: fixture tests
         run: tests/run_tests.sh
-      - name: live run on the CI runner (report only)
+      - name: harden.sh dry run on the CI runner (changes nothing)
+        run: sudo ./harden.sh
+      - name: live audit on the CI runner (report only)
         run: sudo ./audit.sh --no-color || true
+
+  before-after:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Audit, harden, reboot, audit on a throwaway Ubuntu 24.04 container
+        run: ./lab/run-before-after.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: before-after
+          path: |
+            lab/results/
+            docs/before-after-report.md

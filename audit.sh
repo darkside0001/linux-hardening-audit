@@ -278,7 +278,14 @@ check_kernel() {
 
 # ----------------------------------------------- Services (live only) ---
 
-svc_active() { have systemctl && systemctl is-active --quiet "$1" 2>/dev/null; }
+# systemd when it is running; otherwise (containers, OpenRC, SysV) look for the process.
+svc_active() {
+  if have systemctl && [[ -d /run/systemd/system ]]; then
+    systemctl is-active --quiet "$1" 2>/dev/null
+  else
+    pgrep -f "(^|/)$1(-server)?( |$)" >/dev/null 2>&1
+  fi
+}
 
 check_services() {
   if [[ $LIVE -eq 0 ]]; then

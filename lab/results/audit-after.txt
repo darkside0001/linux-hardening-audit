@@ -1,0 +1,45 @@
+linux-hardening-audit v1.0.0  host=vps-lab  root=/  2026-11-22T07:32:15Z
+
+== SSH ==
+[PASS] Root login over SSH disabled (PermitRootLogin no)
+[PASS] Password authentication disabled (PasswordAuthentication no)
+[PASS] Empty passwords rejected (PermitEmptyPasswords no)
+[PASS] MaxAuthTries is 4 or lower (MaxAuthTries 4)
+[PASS] X11 forwarding disabled (X11Forwarding no)
+[PASS] LoginGraceTime is 60s or less (LoginGraceTime 30)
+
+== Accounts ==
+[PASS] Only root has UID 0 (no other UID 0 accounts)
+[PASS] No accounts with empty passwords (checked /etc/shadow)
+[PASS] Password maximum age is set (PASS_MAX_DAYS 365)
+[PASS] No passwordless sudo rules (no NOPASSWD entries)
+
+== Filesystem ==
+[PASS] Permissions on /etc/passwd (mode 644, expected 644 or stricter)
+[PASS] Permissions on /etc/group (mode 644, expected 644 or stricter)
+[PASS] Permissions on /etc/shadow (mode 640, expected 640 or stricter)
+[PASS] Permissions on /etc/gshadow (mode 640, expected 640 or stricter)
+[PASS] Permissions on /etc/ssh/sshd_config (mode 600, expected 644 or stricter)
+[PASS] No world-writable files in /etc (find /etc -perm -0002)
+[PASS] Sticky bit set on /tmp (mode 1777)
+
+== Kernel ==
+[PASS] ASLR fully enabled (kernel.randomize_va_space = 2)
+[PASS] TCP SYN cookies enabled (net.ipv4.tcp_syncookies = 1)
+[PASS] ICMP redirects ignored (net.ipv4.conf.all.accept_redirects = 0)
+[PASS] ICMP redirects not sent (net.ipv4.conf.all.send_redirects = 0)
+[PASS] Source-routed packets rejected (net.ipv4.conf.all.accept_source_route = 0)
+[PASS] Martian packets logged (net.ipv4.conf.all.log_martians = 1)
+
+== Services ==
+[PASS] Host firewall active (nftables)
+[PASS] fail2ban running (brute-force protection active)
+[WARN] auditd not running (security events are not audited)
+       fix: apt install auditd && systemctl enable --now auditd
+[INFO] Ports listening on external interfaces (22 8080 )
+
+== Updates ==
+[PASS] No pending security updates (apt-get -s upgrade)
+[PASS] Unattended security upgrades enabled (20auto-upgrades)
+
+Summary: 27 pass, 1 warn, 0 fail, 0 skipped. Score: 98/100
