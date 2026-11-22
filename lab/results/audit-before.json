@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "host": "vps-lab",
   "root": "/",
-  "date": "2026-11-22T07:27:51Z",
+  "date": "2026-11-22T07:31:52Z",
   "summary": {"pass": 8, "warn": 9, "fail": 11, "skip": 0, "info": 1, "score": 44},
   "findings": [
     {"id": "SSH-01", "category": "SSH", "severity": "high", "status": "FAIL", "title": "Root login over SSH allowed", "detail": "PermitRootLogin yes", "remediation": "Set 'PermitRootLogin no' in /etc/ssh/sshd_config and reload sshd."},

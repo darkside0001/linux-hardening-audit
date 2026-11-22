@@ -1,6 +1,6 @@
 # Linux hardening audit: vps-lab
 
-- Date: 2026-11-22T07:27:52Z
+- Date: 2026-11-22T07:31:53Z
 - Audited root: `/`
 - Score: **44/100** (8 pass, 9 warn, 11 fail, 0 skipped)
 

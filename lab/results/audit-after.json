@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "host": "vps-lab",
   "root": "/",
-  "date": "2026-11-22T07:28:11Z",
+  "date": "2026-11-22T07:32:11Z",
   "summary": {"pass": 27, "warn": 1, "fail": 0, "skip": 0, "info": 1, "score": 98},
   "findings": [
     {"id": "SSH-01", "category": "SSH", "severity": "high", "status": "PASS", "title": "Root login over SSH disabled", "detail": "PermitRootLogin no", "remediation": ""},

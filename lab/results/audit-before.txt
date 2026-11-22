@@ -1,4 +1,4 @@
-linux-hardening-audit v1.0.0  host=vps-lab  root=/  2026-11-22T07:27:52Z
+linux-hardening-audit v1.0.0  host=vps-lab  root=/  2026-11-22T07:31:53Z
 
 == SSH ==
 [FAIL] Root login over SSH allowed (PermitRootLogin yes)

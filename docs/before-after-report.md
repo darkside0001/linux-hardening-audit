@@ -6,7 +6,7 @@ Everything below is produced by [`lab/run-before-after.sh`](../lab/run-before-af
 audit, harden with [`harden.sh`](../harden.sh), reboot, audit again. Raw outputs are in
 [`lab/results/`](../lab/results/).
 
-- Before: 2026-11-22T07:27:51Z  |  After: 2026-11-22T07:28:11Z
+- Before: 2026-11-22T07:31:52Z  |  After: 2026-11-22T07:32:11Z
 
 ## Result
 

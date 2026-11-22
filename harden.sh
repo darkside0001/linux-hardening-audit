@@ -39,6 +39,7 @@ change() { # description, command...
   if [[ $APPLY -eq 1 ]]; then "$@"; say CHANGED "$d"; else say WOULD "$d"; fi
   CHANGED=$((CHANGED + 1))
 }
+# shellcheck disable=SC2329  # also called through change()
 write_file() { # path mode content
   backup "$1"; mkdir -p "$(dirname "$1")"; printf '%s\n' "$3" > "$1"; chmod "$2" "$1"
 }
@@ -63,10 +64,10 @@ if [[ -f /etc/ssh/sshd_config ]]; then
   done
   for f in /etc/sudoers.d/*; do  # users with sudo rules count too
     [[ -f "$f" ]] || continue
-    for u in $(awk '!/^#/ && NF {print $1}' "$f"); do
+    while IFS= read -r u; do
       h=$(getent passwd "$u" | cut -d: -f6 || true)
       [[ -n "$h" && -s "$h/.ssh/authorized_keys" ]] && keys_ok=1
-    done
+    done < <(awk '!/^#/ && NF {print $1}' "$f")
   done
   pwauth="no"
   if [[ $keys_ok -eq 0 && $FORCE_KEYS -eq 0 ]]; then
@@ -107,9 +108,9 @@ fi
 uid0=$(awk -F: '$3==0 && $1!="root" {print $1}' /etc/passwd | tr '\n' ' ')
 [[ -n "$uid0" ]] && MANUAL+=("Accounts with UID 0 besides root: ${uid0% }. Investigate (possible backdoor) and remove.")
 
-for u in $(awk -F: '$2=="" {print $1}' /etc/shadow); do
+while IFS= read -r u; do
   change "lock account '$u' (empty password)" passwd -l "$u"
-done
+done < <(awk -F: '$2=="" {print $1}' /etc/shadow)
 
 if grep -qE '^PASS_MAX_DAYS\s+(99999|[0-9]{4,})' /etc/login.defs; then
   backup /etc/login.defs
@@ -117,6 +118,7 @@ if grep -qE '^PASS_MAX_DAYS\s+(99999|[0-9]{4,})' /etc/login.defs; then
     sed -i -E 's/^PASS_MAX_DAYS\s+.*/PASS_MAX_DAYS\t365/' /etc/login.defs
 fi
 
+# shellcheck disable=SC2329  # called through change()
 fix_nopasswd() {
   local f=$1
   backup "$f"
@@ -124,7 +126,7 @@ fix_nopasswd() {
   if ! visudo -c -q; then cp -a "$BACKUP$f" "$f"; echo "visudo -c failed, $f restored" >&2; return 1; fi
 }
 for f in /etc/sudoers /etc/sudoers.d/*; do
-  [[ -f "$f" ]] && grep -qE '^[^#].*NOPASSWD' "$f" || continue
+  if [[ ! -f "$f" ]] || ! grep -qE '^[^#].*NOPASSWD' "$f"; then continue; fi
   change "sudo: require a password in $f (NOPASSWD removed)" fix_nopasswd "$f"
 done
 
@@ -186,6 +188,7 @@ if ! grep -qs "harden_filter" /etc/nftables.conf; then
   if have ufw && ufw status 2>/dev/null | grep -q "Status: active"; then
     say SKIP "firewall: ufw already active"
   else
+    # shellcheck disable=SC2329  # called through change()
     apply_nft() { write_file /etc/nftables.conf 0755 "$nft_conf" && nft -c -f /etc/nftables.conf && nft -f /etc/nftables.conf; }
     change "nftables: default-deny inbound, allow SSH${SSH_ALLOW_FROM:+ from $SSH_ALLOW_FROM} (rate limited)" apply_nft
     [[ $APPLY -eq 1 ]] && enable_service nftables
