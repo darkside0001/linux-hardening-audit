@@ -1,0 +1,23 @@
+harden.sh  mode=APPLY  host=vps-lab
+backups: /var/backups/hardening-20261122T072753Z
+
+CHANGED  sshd: root login off, password login no, MaxAuthTries 4, no X11 (00-hardening.conf)
+passwd: password changed.
+CHANGED  lock account 'test' (empty password)
+CHANGED  login.defs: PASS_MAX_DAYS 365 (new accounts)
+CHANGED  sudo: require a password in /etc/sudoers.d/90-deploy (NOPASSWD removed)
+CHANGED  chmod 640 /etc/shadow (was 644)
+CHANGED  chmod 600 /etc/ssh/sshd_config (was 644)
+CHANGED  remove world-write bit from /etc/app.conf
+CHANGED  set sticky bit on /tmp (was 777)
+CHANGED  kernel network parameters (/etc/sysctl.d/60-hardening.conf)
+NOTE     sysctl not writable here (container?), applied at next boot
+CHANGED  nftables: default-deny inbound, allow SSH (rate limited)
+CHANGED  fail2ban: sshd jail, 5 failures in 10 min -> 1 h ban
+CHANGED  unattended-upgrades: daily security updates
+RUN      apt-get update && apt-get upgrade (security updates)
+
+12 change(s) applied.
+Needs a human:
+  - Firewall allows only SSH inbound. Open the ports your services need in /etc/nftables.conf.
+  - auditd needs the host kernel's audit subsystem; not started inside a container.

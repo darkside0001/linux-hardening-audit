@@ -1,7 +1,9 @@
 # linux-hardening-audit
 
 A read-only Bash script that checks a Linux server against a security baseline
-inspired by the CIS Benchmarks, and tells you exactly what to fix.
+inspired by the CIS Benchmarks and tells you exactly what to fix, plus a
+companion script that applies those fixes safely, with a reproducible
+before/after demonstration.
 
 I wrote it to speed up the server audits I do (SSH, accounts, file permissions,
 kernel network settings, firewall, updates). It changes nothing on the system:
@@ -20,6 +22,38 @@ Summary: 4 pass, 6 warn, 11 fail, 1 skipped. Score: 33/100
 
 Full sample reports: [text](examples/report-insecure-host.txt), [Markdown](examples/report-insecure-host.md).
 
+## Before and after: 44/100 -> 98/100
+
+[`harden.sh`](harden.sh) fixes what the audit finds, and
+[`lab/run-before-after.sh`](lab/run-before-after.sh) proves it on a throwaway
+Ubuntu 24.04 "VPS" container with typical mistakes (root and password SSH
+login, NOPASSWD sudo, an account without a password, `/etc/shadow` readable by
+everyone, no firewall, a forgotten dev server on port 8080, unsafe kernel
+network settings). It audits, hardens, reboots and audits again, and CI runs
+the whole thing on every push.
+
+| | Score | Fail | High-severity fail | Port 8080 from outside | SSH offers |
+|---|---|---|---|---|---|
+| Before | 44/100 | 11 | 4 | open | publickey, password |
+| After | **98/100** | **0** | **0** | filtered | publickey only |
+
+Full report with every check: [`docs/before-after-report.md`](docs/before-after-report.md).
+The admin's key login is tested after hardening, so the script provably does
+not lock you out. The one remaining warning (auditd) cannot run inside a
+container; on a VM the script enables it.
+
+```bash
+sudo ./harden.sh            # dry run: shows what it would change
+sudo ./harden.sh --apply    # backs up every file, validates sshd/sudoers, applies
+SSH_ALLOW_FROM=10.8.0.0/24 sudo ./harden.sh --apply   # SSH only from your VPN
+```
+
+Safety rules in `harden.sh`: every changed file is backed up to
+`/var/backups/hardening-<timestamp>/`; `sshd -t` and `visudo -c` must pass or
+the change is rolled back; SSH password login is only turned off when a sudo
+user already has an `authorized_keys` file; extra UID 0 accounts are reported
+for a human to decide, never deleted.
+
 ## Features
 
 - 29 checks in 6 areas (see table below), each with a severity and a remediation hint
@@ -29,6 +63,8 @@ Full sample reports: [text](examples/report-insecure-host.txt), [Markdown](examp
 - Offline mode (`--root`) to audit a mounted disk image or container filesystem
 - Reads the effective SSH config with `sshd -T` when run as root, and parses
   `sshd_config.d/*.conf` drop-ins correctly otherwise
+- Detects running services through systemd, or by process on hosts and
+  containers without it
 - Pure Bash plus coreutils. No dependencies to install on the server
 
 ## What it checks
@@ -78,6 +114,7 @@ tests/run_tests.sh
 
 - [ssh-bruteforce-detector](https://github.com/darkside0001/ssh-bruteforce-detector): finds the attacks that weak SSH settings let through
 - [nmap-report](https://github.com/darkside0001/nmap-report): checks the same host from the outside
+- [infra-security-monitoring](https://github.com/darkside0001/infra-security-monitoring): the monitored, firewalled web stack that runs on a host hardened like this
 
 ## License
 

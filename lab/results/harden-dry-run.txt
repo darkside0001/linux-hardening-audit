@@ -1,0 +1,21 @@
+harden.sh  mode=DRY-RUN  host=vps-lab
+
+WOULD    sshd: root login off, password login no, MaxAuthTries 4, no X11 (00-hardening.conf)
+WOULD    lock account 'test' (empty password)
+WOULD    login.defs: PASS_MAX_DAYS 365 (new accounts)
+WOULD    sudo: require a password in /etc/sudoers.d/90-deploy (NOPASSWD removed)
+WOULD    chmod 640 /etc/shadow (was 644)
+WOULD    chmod 600 /etc/ssh/sshd_config (was 644)
+WOULD    remove world-write bit from /etc/app.conf
+WOULD    set sticky bit on /tmp (was 777)
+WOULD    kernel network parameters (/etc/sysctl.d/60-hardening.conf)
+WOULD    nftables: default-deny inbound, allow SSH (rate limited)
+WOULD    fail2ban: sshd jail, 5 failures in 10 min -> 1 h ban
+WOULD    unattended-upgrades: daily security updates
+WOULD    apt-get update && apt-get upgrade
+
+12 change(s) pending.
+Needs a human:
+  - Firewall allows only SSH inbound. Open the ports your services need in /etc/nftables.conf.
+  - auditd needs the host kernel's audit subsystem; not started inside a container.
+Dry run only. Rerun with --apply to make these changes.

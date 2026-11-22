@@ -1,0 +1,64 @@
+linux-hardening-audit v1.0.0  host=vps-lab  root=/  2026-11-22T07:27:52Z
+
+== SSH ==
+[FAIL] Root login over SSH allowed (PermitRootLogin yes)
+       fix: Set 'PermitRootLogin no' in /etc/ssh/sshd_config and reload sshd.
+[FAIL] Password authentication enabled (PasswordAuthentication yes)
+       fix: Use SSH keys and set 'PasswordAuthentication no'. This removes the brute-force attack surface.
+[PASS] Empty passwords rejected (PermitEmptyPasswords no)
+[WARN] MaxAuthTries is higher than 4 (MaxAuthTries 10)
+       fix: Set 'MaxAuthTries 4' (or lower).
+[WARN] X11 forwarding enabled (X11Forwarding yes)
+       fix: Set 'X11Forwarding no' on servers.
+[WARN] LoginGraceTime is longer than 60s (LoginGraceTime 120)
+       fix: Set 'LoginGraceTime 60'.
+
+== Accounts ==
+[PASS] Only root has UID 0 (no other UID 0 accounts)
+[FAIL] Accounts with empty passwords (accounts: test)
+       fix: Lock them with 'passwd -l <user>' or set a password.
+[WARN] Passwords never expire (PASS_MAX_DAYS 99999)
+       fix: Set PASS_MAX_DAYS 365 (or your policy) in /etc/login.defs.
+[WARN] Passwordless sudo rules found (NOPASSWD for: deploy)
+       fix: Limit NOPASSWD to specific commands for service accounts only.
+
+== Filesystem ==
+[PASS] Permissions on /etc/passwd (mode 644, expected 644 or stricter)
+[PASS] Permissions on /etc/group (mode 644, expected 644 or stricter)
+[FAIL] Permissions on /etc/shadow are too open (mode 644, expected 640 or stricter)
+       fix: chmod 640 /etc/shadow
+[PASS] Permissions on /etc/gshadow (mode 640, expected 640 or stricter)
+[PASS] Permissions on /etc/ssh/sshd_config (mode 644, expected 644 or stricter)
+[FAIL] World-writable files in /etc (/etc/app.conf)
+       fix: chmod o-w on these files.
+[WARN] Sticky bit missing on /tmp (mode 777)
+       fix: chmod 1777 /tmp
+
+== Kernel ==
+[PASS] ASLR fully enabled (kernel.randomize_va_space = 2)
+[FAIL] TCP SYN cookies enabled (net.ipv4.tcp_syncookies = 0, expected 1)
+       fix: Add 'net.ipv4.tcp_syncookies = 1' to /etc/sysctl.d/60-hardening.conf, then run 'sysctl --system'.
+[FAIL] ICMP redirects ignored (net.ipv4.conf.all.accept_redirects = 1, expected 0)
+       fix: Add 'net.ipv4.conf.all.accept_redirects = 0' to /etc/sysctl.d/60-hardening.conf, then run 'sysctl --system'.
+[FAIL] ICMP redirects not sent (net.ipv4.conf.all.send_redirects = 1, expected 0)
+       fix: Add 'net.ipv4.conf.all.send_redirects = 0' to /etc/sysctl.d/60-hardening.conf, then run 'sysctl --system'.
+[FAIL] Source-routed packets rejected (net.ipv4.conf.all.accept_source_route = 1, expected 0)
+       fix: Add 'net.ipv4.conf.all.accept_source_route = 0' to /etc/sysctl.d/60-hardening.conf, then run 'sysctl --system'.
+[FAIL] Martian packets logged (net.ipv4.conf.all.log_martians = 0, expected 1)
+       fix: Add 'net.ipv4.conf.all.log_martians = 1' to /etc/sysctl.d/60-hardening.conf, then run 'sysctl --system'.
+
+== Services ==
+[FAIL] No active host firewall (ufw/firewalld/nftables/iptables not filtering input)
+       fix: Enable a default-deny firewall, e.g. 'ufw default deny incoming && ufw allow OpenSSH && ufw enable'.
+[WARN] fail2ban not running (no automatic ban of brute-force sources)
+       fix: apt install fail2ban, enable the sshd jail.
+[WARN] auditd not running (security events are not audited)
+       fix: apt install auditd && systemctl enable --now auditd
+[INFO] Ports listening on external interfaces (22 8080 )
+
+== Updates ==
+[PASS] No pending security updates (apt-get -s upgrade)
+[WARN] Unattended upgrades not enabled (20auto-upgrades missing or disabled)
+       fix: apt install unattended-upgrades && dpkg-reconfigure unattended-upgrades
+
+Summary: 8 pass, 9 warn, 11 fail, 0 skipped. Score: 44/100

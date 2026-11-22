@@ -1,0 +1,5 @@
+# External view (after) from 172.31.98.20
+tcp/22 open
+tcp/8080 closed/filtered
+ssh auth methods offered: publickey
+key login as deploy: OK (admin is not locked out)
